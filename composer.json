@@ -1,0 +1,23 @@
+{
+    "name": "jlem/forms",
+    "description": "",
+    "authors": [
+        {
+            "name": "Jon LeMaitre",
+            "email": "agmlauncher@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "illuminate/support": "4.2.*"
+    },
+    "autoload": {
+        "classmap": [
+            "src/migrations"
+        ],
+        "psr-0": {
+            "Jlem\\Forms\\": "src/"
+        }
+    },
+    "minimum-stability": "stable"
+}
