@@ -75,14 +75,14 @@ Form::macro('bootWrapped', function($Field, $callback)
             </div>
         </div>',
         $Field->hasErrors() ? 'has-error' : '',
-        Form::label($Field->name, $Field->label, array('class' => 'col-sm-3 control-label')),
+        Form::label($Field->getName(), $Field->getLabel(), array('class' => 'col-sm-3 control-label')),
         $callback($Field),
         $Field->error
     );
 });
 
 Form::macro('bootBox', function($Field) {
-    $label = Form::label($Field->name, $Field->label);
+    $label = Form::label($Field->getName(), $Field->getLabel());
     return sprintf(
         '<div class="form-group">
             <div class="col-sm-offset-3 col-sm-5">
@@ -91,31 +91,54 @@ Form::macro('bootBox', function($Field) {
                 </div>
             </div>
         </div>',
-        Form::checkbox($Field->name, true, $Field->checked) . ' ' . $label
+        Form::checkbox($Field->getName(), true, $Field->checked) . ' ' . $label
+    );
+});
+
+Form::macro('bootRadio', function($Field) {
+    $label = Form::label($Field->getName(), $Field->getLabel());
+    return sprintf(
+        '<div class="form-group">
+            <div class="col-sm-offset-3 col-sm-5">
+                <div class="radio">
+                    %s
+                </div>
+            </div>
+        </div>',
+        Form::radio($Field->getName(), true, $Field->checked) . ' ' . $label
     );
 });
 
 Form::macro('bootText', function($Field) {
     return Form::bootWrapped($Field, function($Field) {
-        return Form::text($Field->name, $Field->value, array('class' => 'form-control input-lg', 'maxlength' => $Field->maxlength));
+        return Form::text($Field->getName(), $Field->getValue(), array('class' => 'form-control input-lg', 'maxlength' => $Field->get('maxlength')));
     });
 });
 
+Form::macro('bootHidden', function($Field) {
+    return Form::hidden($Field->getName(), $Field->getValue(), array('class' => 'form-control input-lg', 'maxlength' => $Field->get('maxlength')));
+});
 
 Form::macro('bootTextArea', function($Field) {
     return Form::bootWrapped($Field, function($Field) {
-        return Form::textarea($Field->name, $Field->value, array('class' => 'form-control input-lg'));
+        return Form::textarea($Field->getName(), $Field->getValue(), array('class' => 'form-control input-lg'));
     });
 });
 
 Form::macro('bootPassword', function($Field) {
     return Form::bootWrapped($Field, function($Field) {
-        return Form::password($Field->name, array('class' => 'form-control input-lg'));
+        return Form::password($Field->getName(), array('class' => 'form-control input-lg'));
     });
 });
 
 Form::macro('bootSelect', function($Field) {
     return Form::bootWrapped($Field, function($Field) {
-        return Form::select($Field->name, $Field->data, $Field->value, array('class' => 'form-control input-lg'));
+        return Form::select($Field->getName(), $Field->getData(), $Field->getValue(), array('class' => 'form-control input-lg'));
+    });
+});
+
+Form::macro('bootMultiSelect', function($Field) {
+    return Form::bootWrapped($Field, function($Field) {
+        return Form::select($Field->getName(), $Field->getData(), $Field->getValue(), array('class' => 'form-control input-lg', 'multiple' => true));
     });
 });

@@ -1,6 +1,8 @@
-<?php namespace Jlem\Forms;
+<?php namespace Jlem\Forms\Forms;
 
-use Jlem\Forms\Bindable;
+use Jlem\Fields\Fields\Bindable;
+use Jlem\Forms\FormValidationException;
+use Jlem\Fields\Fields\Field;
 
 abstract class Form
 {
@@ -10,13 +12,12 @@ abstract class Form
     public $url;
     public $bindings;
     protected $fields;
-    protected $errors;
 
     public function __construct($url = null, $cta = 'Submit')
     {
         $this->url = $url;
         $this->cta = $cta;
-        $this->addFields();
+        $this->processFields();
     }
 
 
@@ -102,14 +103,36 @@ abstract class Form
 
 
     /**
+     * Validates a form and throws an exception if an error is detected
+     *
+     * @param mixed $input array|null
+     * @access public
+     * @return void
+     * @throws FormValidationException
+    */
+
+    public function validate($input = null)
+    {
+        if ($this->failsValidation($input)) {
+            throw new FormValidationException(null, $this->validationErrors);
+        }
+    }
+
+
+
+    /**
      * Checks to see if form has passed basic validation, as well as custom validation rules
-     * 
+     * @param mixed $input array|null
      * @return bool
      */
     
-    public function failsValidation()
+    public function failsValidation($input = null)
     {
-        $this->validator = \Validator::make(\Input::all(), $this->getRules(), $this->getMessages());
+        if (!$input) {
+            $input = \Input::all();
+        }
+
+        $this->validator = \Validator::make($input, $this->getRules(), $this->getMessages());
 
         if ($this->validator->fails() || $this->extraValidationFails()) {
             $this->validationErrors = $this->validator;
@@ -122,16 +145,18 @@ abstract class Form
 
 
     /**
-     * Inverted alias of failsValidation()
-     * 
+     * Checks for the presence and result of extra validation in a specific form
+     *
+     * @access public
      * @return bool
-     */
-    
-    public function passesValidation()
-    {
-        return ($this->failsValidation() === false) ? true : false;
-    }
+    */
 
+    public function extraValidationFails()
+    {
+        if (method_exists($this, 'extraValidation')) {
+            return $this->extraValidationFails();
+        }
+    }
 
 
     /**
@@ -160,6 +185,21 @@ abstract class Form
     }
 
 
+    /**
+     * Indexes an array of fields by their name
+     *
+     * @param Array $fields
+     * @access public
+     * @return void
+    */
+
+    public function processFields()
+    {
+        foreach ($this->addFields() as $field) {
+            $this->addField($field);
+        }
+    }
+
 
     /**
      * Adds a new field to the form
@@ -169,7 +209,7 @@ abstract class Form
     
     public function addField(Field $Field)
     {
-        $this->fields[$Field->name] = $Field;
+        $this->fields[$Field->getName()] = $Field;
     }
 
 
@@ -197,8 +237,7 @@ abstract class Form
     
     public function getField($fieldName)
     {
-        if ($this->fieldExists($fieldName))
-        {
+        if ($this->fieldExists($fieldName)) {
            return $this->getFields()[$fieldName]; 
         }
 
@@ -237,5 +276,4 @@ abstract class Form
     abstract public function getRules();
     abstract public function getMessages();
     abstract public function addFields();
-    abstract public function extraValidationFails();
 }

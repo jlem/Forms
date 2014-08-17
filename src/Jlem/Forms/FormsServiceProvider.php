@@ -21,6 +21,10 @@ class FormsServiceProvider extends ServiceProvider {
 		$this->package('jlem/forms');
 		require __DIR__ . '/../../config/macros.php';
 		require __DIR__ . '/../../config/validators.php';
+
+        \App::error(function(FormValidationException $Exception, $code) {
+            return \Redirect::back()->withErrors($Exception->getErrors())->withInput();
+        });
 	}
 
 	/**
